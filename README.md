@@ -4,7 +4,7 @@
 
 Payload Sanitizer is a lightweight, dependency-free Python library for sanitizing XML, JSON, NDJSON, CSV, and flat-file payloads.
 
-It is designed for use in Infor ION scipting environments, including ION, IDM etc.
+It is designed for use in Infor ION scipting environments, including ION, IDM etc. but can also be used as a stand alone library.
 
 ---
 
@@ -29,18 +29,6 @@ This library removes those issues before they impact downstream systems.
 - Safe JSON handling via parsing and re-serialization
 - Optional strict mode for human-readable JSON
 - No external dependencies
-
----
-
-## Installation
-
-Option 1: Copy into your project
-
-payload_sanitizer/
-
-Option 2 (future):
-
-pip install payload-sanitizer
 
 ---
 
@@ -174,7 +162,7 @@ print(payload_sanitizer.__version__)
 - JSON must be parsed; regex-only cleanup is unsafe
 - XML sanitization follows XML 1.0
 - Invisible Unicode characters are intentionally removed
-- Designed for ION → IDM → SX → Data Lake pipelines
+- Designed for ION → IDM → CSD → Data Lake pipelines
 
 ---
 
