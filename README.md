@@ -1,191 +1,154 @@
+🧼 Payload Sanitizer
 
-Payload Sanitizer Library
-Library name: payload_sanitizer
 
-Purpose: Sanitize inbound and outbound payloads to remove characters that commonly break XML, JSON, CSV, and flat-file processing in Infor ION environments (ION, IDM, SX, Data Lake, Java services, and Progress backends).
 
-This library is pure Python (no external dependencies) and is compatible with Python 3.9–3.12.
 
-Design Principles
-·       Format-aware sanitization for XML, JSON, NDJSON, and CSV
 
-·       UTF-8 enforced for all payloads
 
-·       Invisible Unicode removed (ZWSP, BOM, word joiners)
 
-·       JSON payloads are parsed and re-serialized (no regex-only cleanup)
 
-·       Optional strict mode for human-readable JSON output
+A lightweight, dependency-free Python library for sanitizing XML, JSON, NDJSON, CSV, and flat-file payloads in Infor ION pipelines.
 
-Public API
-sanitize_payload(text, payload_type="auto", strict=False)
-Automatically sanitizes a payload based on the specified type or detected format.
+📑 Table of Contents
+🚀 Overview
+🎯 Why This Exists
+⚙️ Features
+📦 Installation
+🧠 How It Works
+🚀 Quick Start
+🔧 API Reference
+📘 Usage Guidelines
+🧪 Real-World Examples
+🔢 Versioning
+⚠️ Important Notes
+✅ Compatibility
+🚀 Overview
 
-Parameters:
+Payload Sanitizer is designed to clean and normalize payloads that commonly break integrations across:
 
-Parameter
+XML (BODs, IDM documents)
+JSON (ION API, REST services)
+NDJSON (Data Lake, streaming data)
+CSV / flat files
 
-Type
+Built specifically for:
 
-Description
+Infor ION
+IDM
+SX / CSD
+Data Lake pipelines
+Java / Progress backend integrations
+🎯 Why This Exists
 
-text
+If you've worked with ION long enough, you've probably hit:
 
-str
+❌ Invalid XML characters breaking BOD processing
+❌ Hidden Unicode characters causing mysterious failures
+❌ JSON payloads that look fine but fail parsing
+❌ CSV column shifts due to control characters
 
-Raw payload text
+This library eliminates those problems before they hit your pipelines.
 
-payload_type
-
-str
-
-auto, xml, json, ndjson, csv, text
-
-strict
-
-bool
-
-JSON/NDJSON only; removes escaped controls and normalizes NBSP
-
-Auto-detection rules:
-
-·       Payload starts with '<' -> XML
-
-·       Payload starts with '{' or '[' -> JSON
-
-·       Otherwise -> generic text sanitization
-
-Example:
-
+⚙️ Features
+✅ Format-aware sanitization (XML, JSON, NDJSON, CSV)
+✅ UTF-8 enforcement across all payloads
+✅ Removes invisible Unicode (ZWSP, BOM, word joiners)
+✅ Safe JSON handling via parsing (no regex hacks)
+✅ Optional strict mode for clean, human-readable JSON
+✅ Zero dependencies (perfect for ION scripting environments)
+📦 Installation
+Option 1: Copy into your project
+payload_sanitizer/
+Option 2: Package (future-ready)
+pip install payload-sanitizer
+🧠 How It Works
+Format	Strategy
+XML	Removes illegal XML 1.0 characters
+JSON	Parses → cleans → re-serializes
+NDJSON	Processes line-by-line
+CSV	Removes control + invisible characters
+Text	Generic Unicode + control cleanup
+🚀 Quick Start
 from payload_sanitizer import sanitize_payload
 
 clean = sanitize_payload(raw_payload, strict=True)
+🔧 API Reference
+sanitize_payload(text, payload_type="auto", strict=False)
 
+Auto-detects and sanitizes payloads.
+
+Detection Rules
+< → XML
+{ or [ → JSON
+Otherwise → text
 sanitize_xml(text)
-Sanitizes XML payloads according to XML 1.0 rules.
-
-Removes:
-
-·       Illegal XML control characters (SOH, VT, etc.)
-
-·       Invisible Unicode (ZWSP, BOM)
-
-·       Non-UTF-8 bytes
-
-Example:
-
+Removes illegal XML characters
+Cleans invisible Unicode
+Enforces UTF-8
 from payload_sanitizer import sanitize_xml
 
 clean_xml = sanitize_xml(raw_xml)
-
 sanitize_json(text, strict=False)
-Sanitizes JSON safely by parsing and re-serializing the payload.
-
-strict=False (default):
-
-·       Produces standards-compliant JSON
-
-·       Preserves escaped control sequences (example: \u0001)
-
-·       Recommended for system-to-system integrations
-
-strict=True:
-
-·       Removes escaped control sequences (example: \u0001, \u000B)
-
-·       Normalizes non-breaking spaces (NBSP -> space)
-
-·       Recommended for logs and human-readable exports
-
-Example:
-
+Default (strict=False)
+Safe for system integrations
+Preserves escaped sequences
+Strict Mode (strict=True)
+Removes escaped control characters
+Normalizes NBSP → space
+Ideal for logs / debugging
 from payload_sanitizer import sanitize_json
 
 clean_json = sanitize_json(raw_json, strict=True)
-
 sanitize_ndjson(text, strict=False)
-Sanitizes newline-delimited JSON (NDJSON) line-by-line.
-
-Behavior:
-
-·       Each line is parsed independently
-
-·       Raises an exception with the line number when a line is invalid JSON
-
-·       Supports strict mode (same behavior as sanitize_json)
-
-Example:
-
+Processes each line independently
+Raises errors with line numbers
 from payload_sanitizer import sanitize_ndjson
 
-clean_ndjson = sanitize_ndjson(raw_ndjson, strict=True)
-
+clean_ndjson = sanitize_ndjson(raw_ndjson)
 sanitize_csv(text)
-Sanitizes CSV and flat-file payloads.
-
-Removes:
-
-·       Control characters that cause column shifting
-
-·       Invisible Unicode characters
-
-·       Non-UTF-8 bytes
-
-Example:
-
+Removes control characters
+Prevents column shifting
+Cleans invisible Unicode
 from payload_sanitizer import sanitize_csv
 
 clean_csv = sanitize_csv(raw_csv)
+📘 Usage Guidelines
+Use Case	Function
+XML / BOD	sanitize_xml()
+JSON API	sanitize_json(strict=False)
+Debug / Logs	sanitize_json(strict=True)
+Data Lake (NDJSON)	sanitize_ndjson()
+CSV / Flat Files	sanitize_csv()
+Unknown payload	sanitize_payload()
+🧪 Real-World Examples
+🔹 Fixing Broken XML (ION BOD)
+raw_xml = "<Name>Test\u0001</Name>"
 
-Usage Guidelines
-Payload Type
+clean_xml = sanitize_xml(raw_xml)
+🔹 Cleaning API JSON Before Sending to ION
+raw_json = '{"name": "Rob\u000B"}'
 
-Recommended Function
-
-XML / BOD
-
-sanitize_xml()
-
-JSON API
-
-sanitize_json(strict=False)
-
-Human-readable JSON
-
-sanitize_json(strict=True)
-
-NDJSON
-
-sanitize_ndjson()
-
-CSV / Flat files
-
-sanitize_csv()
-
-Unknown / Mixed
-
-sanitize_payload()
-
-Versioning
-The library exposes its version:
-
+clean_json = sanitize_json(raw_json)
+🔹 Preparing Data Lake NDJSON
+clean_ndjson = sanitize_ndjson(raw_ndjson, strict=True)
+🔹 Fixing CSV Import Issues
+clean_csv = sanitize_csv(raw_csv)
+🔢 Versioning
 import payload_sanitizer
-payload_sanitizer.__version__
 
-Recommended to log the library version once per script execution.
+print(payload_sanitizer.__version__)
 
-Important Notes
-·       JSON payloads must be parsed; regex-only cleanup is unsafe for JSON.
+💡 Log this once per execution for traceability.
 
-·       XML sanitization follows XML 1.0 (not XML 1.1).
+⚠️ Important Notes
+🚫 Do not use regex-only cleanup for JSON
+XML follows XML 1.0 rules (not 1.1)
+Invisible Unicode removal is intentional
 
-·       Invisible Unicode characters are removed intentionally.
+Designed for:
 
-·       Designed for ION -> IDM -> SX -> Data Lake pipelines.
-
-Compatibility
-·       Python 3.9+
-
-·       Infor ION Script Libraries
-
-·       No external dependencies
+ION → IDM → SX → Data Lake
+✅ Compatibility
+Python 3.9+
+Infor ION Script Libraries
+No external dependencies
