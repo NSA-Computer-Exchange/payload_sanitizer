@@ -1,3 +1,14 @@
+## Quick Start (TUG Attendees)
+
+1. Click "Code"
+2. Download ZIP (no Git required)
+
+OR
+
+git clone https://github.com/NSA-Computer-Exchange/payload_sanitizer
+
+---
+
 # Payload Sanitizer
 
 ## Overview
