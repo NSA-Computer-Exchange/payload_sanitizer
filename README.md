@@ -6,7 +6,6 @@
 OR
 
 git clone https://github.com/NSA-Computer-Exchange/payload_sanitizer  
-git remote remove origin
 
 ---
 
